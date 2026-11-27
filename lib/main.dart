@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'app_localizations.dart';
 import 'language_service.dart';
 import 'questions.dart';
+import 'question_translations_en.dart';
 import 'question_service.dart';
 
 Future<void> main() async {
@@ -156,6 +157,11 @@ class _HomePageState extends State<HomePage> {
     });
   }
   String t(String key) => gameText(widget.languageCode, key);
+  LocalizedQuestion? get _englishQ => widget.languageCode == 'en' ? englishQuestionTranslations[q.id] : null;
+  String get questionText => _englishQ?.question ?? q.question;
+  String get categoryText => _englishQ?.category ?? q.category;
+  List<String> get optionTexts => _englishQ?.options ?? q.options;
+  String get explanationText => _englishQ?.explanation ?? explanationText;
   String get guaranteed => index >= 10 ? '10.000 TL' : index >= 5 ? '5.000 TL' : '0 TL';
 
   void answer(int i) {
@@ -180,7 +186,7 @@ class _HomePageState extends State<HomePage> {
           }
         } else {
           finished = true;
-          notice = '${t('wrong')} ${q.options[q.answer]}';
+          notice = '${t('wrong')} ${optionTexts[q.answer]}';
         }
       });
     });
@@ -213,7 +219,7 @@ class _HomePageState extends State<HomePage> {
 
   void useExpert() {
     if (expertUsed || locked) return;
-    setState(() { expertUsed = true; notice = '${t('hint')}: ${q.explanation}'; });
+    setState(() { expertUsed = true; notice = '${t('hint')}: ${explanationText}'; });
   }
 
   Future<void> restart() async {
@@ -435,7 +441,7 @@ class _HomePageState extends State<HomePage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                 decoration: BoxDecoration(color: const Color(0x22E8C878), borderRadius: BorderRadius.circular(20)),
-                child: Text(q.category.toUpperCase(), style: const TextStyle(color: Color(0xFFFFD978), fontSize: 10, fontWeight: FontWeight.bold)),
+                child: Text(categoryText.toUpperCase(), style: const TextStyle(color: Color(0xFFFFD978), fontSize: 10, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -480,7 +486,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         const Icon(Icons.stars_rounded, color: Color(0xFFE8C878), size: 25),
                         const SizedBox(height: 12),
-                        Text(q.question, textAlign: TextAlign.center,
+                        Text(questionText, textAlign: TextAlign.center,
                           style: TextStyle(fontSize: compact ? 20 : 25, height: 1.4, fontWeight: FontWeight.w700, color: const Color(0xFFFFF5D9))),
                       ],
                     ),
@@ -523,7 +529,7 @@ class _HomePageState extends State<HomePage> {
                                   child: Text(String.fromCharCode(65 + i), style: const TextStyle(color: Color(0xFFFFD978), fontWeight: FontWeight.w900)),
                                 ),
                                 const SizedBox(width: 13),
-                                Expanded(child: Text(isHidden ? '' : q.options[i],
+                                Expanded(child: Text(isHidden ? '' : optionTexts[i],
                                   style: const TextStyle(fontSize: 15, height: 1.3, color: Color(0xFFF4F1E7), fontWeight: FontWeight.w500))),
                                 if (isCorrect) const Icon(Icons.check_circle, color: Color(0xFFFFD978))
                                 else if (isWrong) const Icon(Icons.cancel, color: Colors.white),
