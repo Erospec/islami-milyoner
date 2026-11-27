@@ -1,7 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'app_localizations.dart';
+import 'language_service.dart';
 
-void main() => runApp(const IslamicMillionaireApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const IslamicMillionaireApp());
+}
 
 class QuizQuestion {
   final String category, question, explanation;
@@ -11,36 +16,21 @@ class QuizQuestion {
 }
 
 const questions = <QuizQuestion>[
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’de kaç sure vardır?',
-    ['110', '112', '114', '116'], 2, 'Kur’an-ı Kerim 114 sureden oluşur.'),
-  QuizQuestion('Siyer', 'Hz. Muhammed’e (s.a.v.) ilk vahiy hangi mağarada gelmiştir?',
-    ['Sevr', 'Hira', 'Nur', 'Arafat'], 1, 'İlk vahiy, Mekke yakınlarındaki Hira Mağarası’nda gelmiştir.'),
-  QuizQuestion('İbadet', 'İslam’ın şartı kaçtır?',
-    ['Üç', 'Dört', 'Beş', 'Altı'], 2, 'Yaygın olarak öğretilen tasnife göre İslam’ın beş şartı vardır.'),
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’in ilk suresi hangisidir?',
-    ['Bakara', 'Fatiha', 'İhlas', 'Alak'], 1, 'Mushaf sıralamasındaki ilk sure Fatiha Suresi’dir.'),
-  QuizQuestion('Siyer', 'Hz. Muhammed (s.a.v.) hangi şehirde dünyaya gelmiştir?',
-    ['Medine', 'Taif', 'Kudüs', 'Mekke'], 3, 'Hz. Muhammed (s.a.v.) Mekke’de dünyaya gelmiştir.'),
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim hangi dilde indirilmiştir?',
-    ['İbranice', 'Arapça', 'Süryanice', 'Farsça'], 1, 'Kur’an’ın kendi ifadesiyle Arapça bir Kur’an olarak indirilmiştir.'),
-  QuizQuestion('Hadis', '“Ameller niyetlere göredir” hadisi en çok hangi konuyu vurgular?',
-    ['Niyetin önemini', 'Ticaretin önemini', 'Yolculuğu', 'Komşuluk hukukunu'], 0, 'Bu hadis, yapılan işlerde niyetin belirleyici önemini vurgular.'),
-  QuizQuestion('İslam Tarihi', 'Hicret, Müslümanların hangi şehirden hangi şehre göçüdür?',
-    ['Mekke’den Medine’ye', 'Medine’den Şam’a', 'Taif’ten Mekke’ye', 'Kudüs’ten Medine’ye'], 0, 'Hicret, 622 yılında Mekke’den Medine’ye gerçekleşmiştir.'),
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’in en uzun suresi hangisidir?',
-    ['Âl-i İmrân', 'Nisâ', 'Bakara', 'Mâide'], 2, 'En uzun sure, 286 ayetli Bakara Suresi’dir.'),
-  QuizQuestion('Siyer', 'İlk Müslüman kadın olarak kabul edilen kişi kimdir?',
-    ['Hz. Âişe', 'Hz. Hatice', 'Hz. Fatıma', 'Hz. Hafsa'], 1, 'Hz. Hatice, İslam’ı ilk kabul eden kişidir.'),
-  QuizQuestion('İslam Tarihi', 'Bedir Savaşı hicretin kaçıncı yılında gerçekleşmiştir?',
-    ['1. yıl', '2. yıl', '3. yıl', '5. yıl'], 1, 'Bedir Savaşı, hicretin ikinci yılında (624) gerçekleşmiştir.'),
-  QuizQuestion('Hadis', 'Kütüb-i Sitte ifadesi geleneksel olarak kaç hadis kitabını ifade eder?',
-    ['Dört', 'Beş', 'Altı', 'Yedi'], 2, 'Kütüb-i Sitte, Sünni hadis geleneğinde altı temel hadis kitabı için kullanılan addır.'),
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’de adı geçen ve aynı zamanda bir sureye adını veren peygamber kimdir?',
-    ['Hz. Yunus', 'Hz. Yusuf', 'Hz. İdris', 'Hz. Şuayb'], 1, 'Yusuf Suresi, Hz. Yusuf’un kıssasını anlatır.'),
-  QuizQuestion('İslam Tarihi', 'Mekke’nin fethi hangi hicrî yılda gerçekleşmiştir?',
-    ['6', '7', '8', '10'], 2, 'Mekke’nin fethi hicretin 8. yılında, miladi 630’da gerçekleşmiştir.'),
-  QuizQuestion('Kur’an ve Siyer', 'Veda Hutbesi, Hz. Muhammed (s.a.v.) tarafından hangi hac sırasında irat edilmiştir?',
-    ['Umre', 'Veda Haccı', 'İlk hac', 'Kaza umresi'], 1, 'Veda Hutbesi, hicretin 10. yılında yapılan Veda Haccı sırasında irat edilmiştir.'),
+  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’de kaç sure vardır?', ['110', '112', '114', '116'], 2, 'Kur’an-ı Kerim 114 sureden oluşur.'),
+  QuizQuestion('Siyer', 'Hz. Muhammed’e (s.a.v.) ilk vahiy hangi mağarada gelmiştir?', ['Sevr', 'Hira', 'Nur', 'Arafat'], 1, 'İlk vahiy, Mekke yakınlarındaki Hira Mağarası’nda gelmiştir.'),
+  QuizQuestion('İbadet', 'İslam’ın şartı kaçtır?', ['Üç', 'Dört', 'Beş', 'Altı'], 2, 'Yaygın olarak öğretilen tasnife göre İslam’ın beş şartı vardır.'),
+  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’in ilk suresi hangisidir?', ['Bakara', 'Fatiha', 'İhlas', 'Alak'], 1, 'Mushaf sıralamasındaki ilk sure Fatiha Suresi’dir.'),
+  QuizQuestion('Siyer', 'Hz. Muhammed (s.a.v.) hangi şehirde dünyaya gelmiştir?', ['Medine', 'Taif', 'Kudüs', 'Mekke'], 3, 'Hz. Muhammed (s.a.v.) Mekke’de dünyaya gelmiştir.'),
+  QuizQuestion('Kur’an', 'Kur’an-ı Kerim hangi dilde indirilmiştir?', ['İbranice', 'Arapça', 'Süryanice', 'Farsça'], 1, 'Kur’an’ın kendi ifadesiyle Arapça bir Kur’an olarak indirilmiştir.'),
+  QuizQuestion('Hadis', '“Ameller niyetlere göredir” hadisi en çok hangi konuyu vurgular?', ['Niyetin önemini', 'Ticaretin önemini', 'Yolculuğu', 'Komşuluk hukukunu'], 0, 'Bu hadis, yapılan işlerde niyetin belirleyici önemini vurgular.'),
+  QuizQuestion('İslam Tarihi', 'Hicret, Müslümanların hangi şehirden hangi şehre göçüdür?', ['Mekke’den Medine’ye', 'Medine’den Şam’a', 'Taif’ten Mekke’ye', 'Kudüs’ten Medine’ye'], 0, 'Hicret, 622 yılında Mekke’den Medine’ye gerçekleşmiştir.'),
+  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’in en uzun suresi hangisidir?', ['Âl-i İmrân', 'Nisâ', 'Bakara', 'Mâide'], 2, 'En uzun sure, 286 ayetli Bakara Suresi’dir.'),
+  QuizQuestion('Siyer', 'İlk Müslüman kadın olarak kabul edilen kişi kimdir?', ['Hz. Âişe', 'Hz. Hatice', 'Hz. Fatıma', 'Hz. Hafsa'], 1, 'Hz. Hatice, İslam’ı ilk kabul eden kişidir.'),
+  QuizQuestion('İslam Tarihi', 'Bedir Savaşı hicretin kaçıncı yılında gerçekleşmiştir?', ['1. yıl', '2. yıl', '3. yıl', '5. yıl'], 1, 'Bedir Savaşı, hicretin ikinci yılında (624) gerçekleşmiştir.'),
+  QuizQuestion('Hadis', 'Kütüb-i Sitte ifadesi geleneksel olarak kaç hadis kitabını ifade eder?', ['Dört', 'Beş', 'Altı', 'Yedi'], 2, 'Kütüb-i Sitte, Sünni hadis geleneğinde altı temel hadis kitabı için kullanılan addır.'),
+  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’de adı geçen ve aynı zamanda bir sureye adını veren peygamber kimdir?', ['Hz. Yunus', 'Hz. Yusuf', 'Hz. İdris', 'Hz. Şuayb'], 1, 'Yusuf Suresi, Hz. Yusuf’un kıssasını anlatır.'),
+  QuizQuestion('İslam Tarihi', 'Mekke’nin fethi hangi hicrî yılda gerçekleşmiştir?', ['6', '7', '8', '10'], 2, 'Mekke’nin fethi hicretin 8. yılında, miladi 630’da gerçekleşmiştir.'),
+  QuizQuestion('Kur’an ve Siyer', 'Veda Hutbesi, Hz. Muhammed (s.a.v.) tarafından hangi hac sırasında irat edilmiştir?', ['Umre', 'Veda Haccı', 'İlk hac', 'Kaza umresi'], 1, 'Veda Hutbesi, hicretin 10. yılında yapılan Veda Haccı sırasında irat edilmiştir.'),
 ];
 
 const prizeLadder = [
@@ -49,25 +39,69 @@ const prizeLadder = [
   '100.000 TL', '250.000 TL', '500.000 TL', '750.000 TL', '1.000.000 TL'
 ];
 
-class IslamicMillionaireApp extends StatelessWidget {
+class IslamicMillionaireApp extends StatefulWidget {
   const IslamicMillionaireApp({super.key});
+
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'İslamiyet Milyoneri',
-    theme: ThemeData(
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: const Color(0xFF071B18),
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFD6AE55), brightness: Brightness.dark),
-      useMaterial3: true,
-      fontFamily: 'Roboto',
-    ),
-    home: const HomePage(),
-  );
+  State<IslamicMillionaireApp> createState() => _IslamicMillionaireAppState();
+}
+
+class _IslamicMillionaireAppState extends State<IslamicMillionaireApp> {
+  final LanguageService _languageService = LanguageService();
+  String _languageCode = 'tr';
+  bool _languageLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final deviceCode = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    final savedCode = await _languageService.loadLanguage(deviceCode);
+    if (!mounted) return;
+    setState(() {
+      _languageCode = savedCode;
+      _languageLoaded = true;
+    });
+  }
+
+  Future<void> _changeLanguage(String code) async {
+    await _languageService.saveLanguage(code);
+    if (!mounted) return;
+    setState(() => _languageCode = code);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rtl = isRtlLanguage(_languageCode);
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'İslamiyet Milyoneri',
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF071B18),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFD6AE55), brightness: Brightness.dark),
+        useMaterial3: true,
+        fontFamily: 'Roboto',
+      ),
+      home: Directionality(
+        textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
+        child: _languageLoaded
+            ? HomePage(languageCode: _languageCode, onLanguageChanged: _changeLanguage)
+            : const Scaffold(body: Center(child: CircularProgressIndicator())),
+      ),
+    );
+  }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String languageCode;
+  final ValueChanged<String> onLanguageChanged;
+
+  const HomePage({super.key, required this.languageCode, required this.onLanguageChanged});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -81,7 +115,7 @@ class _HomePageState extends State<HomePage> {
   final random = Random();
 
   QuizQuestion get q => questions[index];
-  bool get safeLevel => index >= 4 && index < 9 ? true : index >= 9;
+  String t(String key) => gameText(widget.languageCode, key);
   String get guaranteed => index >= 10 ? '10.000 TL' : index >= 5 ? '5.000 TL' : '0 TL';
 
   void answer(int i) {
@@ -91,11 +125,19 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       setState(() {
         if (i == q.answer) {
-          if (index == questions.length - 1) { finished = true; notice = 'Tebrikler! Büyük ödüle ulaştın.'; }
-          else { notice = 'Doğru cevap!'; index++; selected = null; locked = false; hidden = []; }
+          if (index == questions.length - 1) {
+            finished = true;
+            notice = 'Congratulations! You reached the top prize.';
+          } else {
+            notice = t('correct');
+            index++;
+            selected = null;
+            locked = false;
+            hidden = [];
+          }
         } else {
           finished = true;
-          notice = 'Yanlış cevap. Doğru cevap: ${q.options[q.answer]}';
+          notice = '${t('wrong')} ${q.options[q.answer]}';
         }
       });
     });
@@ -104,8 +146,9 @@ class _HomePageState extends State<HomePage> {
   void useFifty() {
     if (fiftyUsed || locked) return;
     final wrong = List<int>.generate(4, (i) => i)..remove(q.answer)..shuffle();
-    setState(() { fiftyUsed = true; hidden = wrong.take(2).toList(); notice = 'İki yanlış seçenek kaldırıldı.'; });
+    setState(() { fiftyUsed = true; hidden = wrong.take(2).toList(); notice = 'Two incorrect options removed.'; });
   }
+
   void useAudience() {
     if (audienceUsed || locked) return;
     final correct = 45 + random.nextInt(36);
@@ -116,101 +159,159 @@ class _HomePageState extends State<HomePage> {
     var left = remaining;
     for (var j = 0; j < wrong.length; j++) {
       final v = j == wrong.length - 1 ? left : random.nextInt(left + 1);
-      vals[wrong[j]] = v; left -= v;
+      vals[wrong[j]] = v;
+      left -= v;
     }
-    setState(() { audienceUsed = true; notice = 'Seyirci tahmini: ${vals.asMap().entries.map((e) => '${String.fromCharCode(65+e.key)}: %${e.value}').join('  ')}'; });
+    setState(() {
+      audienceUsed = true;
+      notice = 'Audience: ${vals.asMap().entries.map((e) => '${String.fromCharCode(65 + e.key)}: ${e.value}%').join('  ')}';
+    });
   }
+
   void useExpert() {
     if (expertUsed || locked) return;
-    setState(() { expertUsed = true; notice = 'Bilge ipucu: ${q.explanation}'; });
+    setState(() { expertUsed = true; notice = 'Hint: ${q.explanation}'; });
   }
+
   void restart() => setState(() {
     index = 0; selected = null; locked = false; finished = false;
     fiftyUsed = false; audienceUsed = false; expertUsed = false; notice = null; hidden = [];
   });
 
+  Future<void> _selectLanguage() async {
+    final selectedCode = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: const Color(0xFF10332C),
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: SizedBox(
+          height: MediaQuery.of(sheetContext).size.height * 0.72,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Text(t('language'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFE8C878))),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: supportedLanguages.length,
+                  itemBuilder: (context, i) {
+                    final language = supportedLanguages[i];
+                    return ListTile(
+                      title: Text(language.nativeName, textDirection: language.isRtl ? TextDirection.rtl : TextDirection.ltr),
+                      trailing: language.code == widget.languageCode ? const Icon(Icons.check, color: Color(0xFFE8C878)) : null,
+                      onTap: () => Navigator.pop(sheetContext, language.code),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (selectedCode != null) widget.onLanguageChanged(selectedCode);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(child: finished ? _result() : Row(children: [
-        Expanded(flex: 7, child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 10, 18),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Row(children: const [Icon(Icons.nights_stay, color: Color(0xFFD6AE55)), SizedBox(width: 8), Text('İSLAMİYET MİLYONERİ', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.1, color: Color(0xFFE8C878)))]),
-            const SizedBox(height: 20),
-            Text('SORU ${index + 1} / 15  •  ${q.category.toUpperCase()}', style: const TextStyle(color: Color(0xFFD6AE55), fontWeight: FontWeight.w700, letterSpacing: 1)),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(22),
-              decoration: BoxDecoration(color: const Color(0xFF10332C), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFB78C3B))),
-              child: Text(q.question, textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, height: 1.35, fontWeight: FontWeight.w600)),
-            ),
-            const SizedBox(height: 20),
-            ...List.generate(4, (i) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: InkWell(
-                onTap: () => answer(i),
-                borderRadius: BorderRadius.circular(14),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: hidden.contains(i) ? Colors.transparent : selected == i
-                      ? (i == q.answer ? const Color(0xFF236A45) : const Color(0xFF873D36))
-                      : const Color(0xFF123D34),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: selected == i ? const Color(0xFFE8C878) : const Color(0xFF527B6B)),
-                  ),
-                  child: Row(children: [
-                    Text(String.fromCharCode(65+i), style: const TextStyle(color: Color(0xFFE8C878), fontWeight: FontWeight.bold)),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(hidden.contains(i) ? ' ' : q.options[i], style: const TextStyle(fontSize: 16))),
-                  ]),
+      body: SafeArea(
+        child: finished ? _result() : Row(children: [
+          Expanded(
+            flex: 7,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 12, 10, 18),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Row(children: [
+                  const Icon(Icons.nights_stay, color: Color(0xFFD6AE55)),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(t('title'), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.1, color: Color(0xFFE8C878), fontSize: 13))),
+                  IconButton(onPressed: _selectLanguage, tooltip: t('language'), icon: const Icon(Icons.language, color: Color(0xFFE8C878))),
+                ]),
+                const SizedBox(height: 12),
+                Text('${t('question')} ${index + 1} / 15  •  ${q.category.toUpperCase()}',
+                  style: const TextStyle(color: Color(0xFFD6AE55), fontWeight: FontWeight.w700, letterSpacing: 1)),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(22),
+                  decoration: BoxDecoration(color: const Color(0xFF10332C), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFB78C3B))),
+                  child: Text(q.question, textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, height: 1.35, fontWeight: FontWeight.w600)),
                 ),
-              ),
-            )),
-            const Spacer(),
-            if (notice != null) Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: const Color(0xFF183D32), borderRadius: BorderRadius.circular(12)),
-              child: Text(notice!, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFE8C878))),
+                const SizedBox(height: 20),
+                ...List.generate(4, (i) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: InkWell(
+                    onTap: () => answer(i),
+                    borderRadius: BorderRadius.circular(14),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: hidden.contains(i) ? Colors.transparent : selected == i
+                            ? (i == q.answer ? const Color(0xFF236A45) : const Color(0xFF873D36))
+                            : const Color(0xFF123D34),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: selected == i ? const Color(0xFFE8C878) : const Color(0xFF527B6B)),
+                      ),
+                      child: Row(children: [
+                        Text(String.fromCharCode(65 + i), style: const TextStyle(color: Color(0xFFE8C878), fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text(hidden.contains(i) ? ' ' : q.options[i], style: const TextStyle(fontSize: 16))),
+                      ]),
+                    ),
+                  ),
+                )),
+                const Spacer(),
+                if (notice != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: const Color(0xFF183D32), borderRadius: BorderRadius.circular(12)),
+                    child: Text(notice!, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFE8C878))),
+                  ),
+                const SizedBox(height: 8),
+                Text(t('disclaimer'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+              ]),
             ),
-            const SizedBox(height: 8),
-            const Text('Bilgi yarışmasıdır; gerçek para ödülü verilmez.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white54, fontSize: 11)),
-          ]),
-        )),
-        Container(width: 1, color: const Color(0xFF315448)),
-        Expanded(flex: 3, child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 18, 10, 18),
-          child: Column(children: [
-            const Text('JOKERLER', style: TextStyle(color: Color(0xFFD6AE55), fontWeight: FontWeight.bold, fontSize: 12)),
-            const SizedBox(height: 12),
-            _joker('50:50', fiftyUsed, useFifty),
-            _joker('Seyirci', audienceUsed, useAudience),
-            _joker('Bilge', expertUsed, useExpert),
-            const Divider(height: 24, color: Color(0xFF527B6B)),
-            const Text('ÖDÜL MERDİVENİ', style: TextStyle(color: Color(0xFFD6AE55), fontSize: 10, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Expanded(child: ListView.builder(
-              reverse: true,
-              itemCount: prizeLadder.length,
-              itemBuilder: (context, i) {
-                final actual = 14 - i;
-                final active = actual == index;
-                final safe = actual == 4 || actual == 9;
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 4),
-                  padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
-                  decoration: BoxDecoration(color: active ? const Color(0xFFB78C3B) : Colors.transparent, borderRadius: BorderRadius.circular(7)),
-                  child: Text('${actual+1}.  ${prizeLadder[actual]}', textAlign: TextAlign.right,
-                    style: TextStyle(fontSize: 11, fontWeight: active ? FontWeight.bold : FontWeight.normal,
-                      color: active ? const Color(0xFF071B18) : safe ? const Color(0xFFE8C878) : Colors.white70)),
-                );
-              },
-            )),
-          ]),
-        )),
-      ])),
+          ),
+          Container(width: 1, color: const Color(0xFF315448)),
+          Expanded(
+            flex: 3,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 18, 10, 18),
+              child: Column(children: [
+                Text(t('lifelines'), style: const TextStyle(color: Color(0xFFD6AE55), fontWeight: FontWeight.bold, fontSize: 12)),
+                const SizedBox(height: 12),
+                _joker(t('fifty'), fiftyUsed, useFifty),
+                _joker(t('audience'), audienceUsed, useAudience),
+                _joker(t('expert'), expertUsed, useExpert),
+                const Divider(height: 24, color: Color(0xFF527B6B)),
+                Text(t('ladder'), style: const TextStyle(color: Color(0xFFD6AE55), fontSize: 10, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView.builder(
+                    reverse: true,
+                    itemCount: prizeLadder.length,
+                    itemBuilder: (context, i) {
+                      final actual = 14 - i;
+                      final active = actual == index;
+                      final safe = actual == 4 || actual == 9;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
+                        decoration: BoxDecoration(color: active ? const Color(0xFFB78C3B) : Colors.transparent, borderRadius: BorderRadius.circular(7)),
+                        child: Text('${actual + 1}.  ${prizeLadder[actual]}', textAlign: TextAlign.right,
+                          style: TextStyle(fontSize: 11, fontWeight: active ? FontWeight.bold : FontWeight.normal,
+                            color: active ? const Color(0xFF071B18) : safe ? const Color(0xFFE8C878) : Colors.white70)),
+                      );
+                    },
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ]),
+      ),
     );
   }
 
@@ -223,19 +324,21 @@ class _HomePageState extends State<HomePage> {
     ),
   );
 
-  Widget _result() => Center(child: Padding(
-    padding: const EdgeInsets.all(28),
-    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      const Icon(Icons.emoji_events, size: 76, color: Color(0xFFE8C878)),
-      const SizedBox(height: 18),
-      Text(index == 14 && notice?.startsWith('Tebrikler') == true ? 'MÜKEMMEL!' : 'YARIŞMA TAMAMLANDI',
-        textAlign: TextAlign.center, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Color(0xFFE8C878))),
-      const SizedBox(height: 12),
-      Text(notice ?? 'Yarışma sona erdi.', textAlign: TextAlign.center, style: const TextStyle(fontSize: 17)),
-      const SizedBox(height: 10),
-      Text('Güvenli seviyen: $guaranteed', style: const TextStyle(color: Colors.white70)),
-      const SizedBox(height: 24),
-      FilledButton.icon(onPressed: restart, icon: const Icon(Icons.replay), label: const Text('YENİDEN OYNA')),
-    ]),
-  ));
+  Widget _result() => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(28),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        const Icon(Icons.emoji_events, size: 76, color: Color(0xFFE8C878)),
+        const SizedBox(height: 18),
+        Text(index == 14 && notice?.startsWith('Congratulations') == true ? 'EXCELLENT!' : 'GAME OVER',
+          textAlign: TextAlign.center, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Color(0xFFE8C878))),
+        const SizedBox(height: 12),
+        Text(notice ?? 'The game has ended.', textAlign: TextAlign.center, style: const TextStyle(fontSize: 17)),
+        const SizedBox(height: 10),
+        Text('Guaranteed level: $guaranteed', style: const TextStyle(color: Colors.white70)),
+        const SizedBox(height: 24),
+        FilledButton.icon(onPressed: restart, icon: const Icon(Icons.replay), label: Text(t('play_again'))),
+      ]),
+    ),
+  );
 }
