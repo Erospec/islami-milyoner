@@ -150,7 +150,7 @@ class _HomePageState extends State<HomePage> {
         timer.cancel();
         setState(() {
           finished = true;
-          notice = 'Süre doldu! Cevap veremedin.';
+          notice = t('time_up');
         });
       }
     });
@@ -168,7 +168,7 @@ class _HomePageState extends State<HomePage> {
         if (i == q.answer) {
           if (index == gameQuestions.length - 1) {
             finished = true;
-            notice = 'Congratulations! You reached the top prize.';
+            notice = t('top_prize');
           } else {
             notice = t('correct');
             index++;
@@ -189,7 +189,7 @@ class _HomePageState extends State<HomePage> {
   void useFifty() {
     if (fiftyUsed || locked) return;
     final wrong = List<int>.generate(4, (i) => i)..remove(q.answer)..shuffle();
-    setState(() { fiftyUsed = true; hidden = wrong.take(2).toList(); notice = 'Two incorrect options removed.'; });
+    setState(() { fiftyUsed = true; hidden = wrong.take(2).toList(); notice = t('fifty_used'); });
   }
 
   void useAudience() {
@@ -207,13 +207,13 @@ class _HomePageState extends State<HomePage> {
     }
     setState(() {
       audienceUsed = true;
-      notice = 'Audience: ${vals.asMap().entries.map((e) => '${String.fromCharCode(65 + e.key)}: ${e.value}%').join('  ')}';
+      notice = '${t('audience_result')} ${vals.asMap().entries.map((e) => '${String.fromCharCode(65 + e.key)}: ${e.value}%').join('  ')}';
     });
   }
 
   void useExpert() {
     if (expertUsed || locked) return;
-    setState(() { expertUsed = true; notice = 'Hint: ${q.explanation}'; });
+    setState(() { expertUsed = true; notice = '${t('hint')}: ${q.explanation}'; });
   }
 
   Future<void> restart() async {
@@ -681,12 +681,12 @@ class _HomePageState extends State<HomePage> {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         const Icon(Icons.emoji_events, size: 76, color: Color(0xFFE8C878)),
         const SizedBox(height: 18),
-        Text(index == 14 && notice?.startsWith('Congratulations') == true ? 'EXCELLENT!' : 'GAME OVER',
+        Text(index == 14 && notice?.startsWith('Congratulations') == true ? t('excellent') : t('game_over'),
           textAlign: TextAlign.center, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Color(0xFFE8C878))),
         const SizedBox(height: 12),
         Text(notice ?? 'The game has ended.', textAlign: TextAlign.center, style: const TextStyle(fontSize: 17)),
         const SizedBox(height: 10),
-        Text('Guaranteed level: $guaranteed', style: const TextStyle(color: Colors.white70)),
+        Text('${t('guaranteed_level')}: $guaranteed', style: const TextStyle(color: Colors.white70)),
         const SizedBox(height: 24),
         FilledButton.icon(onPressed: restart, icon: const Icon(Icons.replay), label: Text(t('play_again'))),
       ]),
