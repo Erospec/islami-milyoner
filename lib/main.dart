@@ -161,7 +161,7 @@ class _HomePageState extends State<HomePage> {
   String get questionText => _englishQ?.question ?? q.question;
   String get categoryText => _englishQ?.category ?? q.category;
   List<String> get optionTexts => _englishQ?.options ?? q.options;
-  String get explanationText => _englishQ?.explanation ?? explanationText;
+  String get explanationText => _englishQ?.explanation ?? q.explanation;
   String get guaranteed => index >= 10 ? '10.000 TL' : index >= 5 ? '5.000 TL' : '0 TL';
 
   void answer(int i) {
