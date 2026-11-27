@@ -131,6 +131,7 @@ class _HomePageState extends State<HomePage> {
       finished = false;
       _secondsRemaining = 30;
     });
+    if (_soundEnabled) SystemSound.play(SystemSoundType.alert);
     _startCountdown();
   }
 
@@ -145,7 +146,7 @@ class _HomePageState extends State<HomePage> {
         if (_secondsRemaining > 0) _secondsRemaining--;
       });
       if (_soundEnabled && _secondsRemaining <= 10) {
-        SystemSound.play(SystemSoundType.click);
+        SystemSound.play(SystemSoundType.alert);
       }
       if (_secondsRemaining == 0) {
         timer.cancel();
@@ -172,6 +173,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       setState(() {
         if (i == q.answer) {
+          if (_soundEnabled) SystemSound.play(SystemSoundType.alert);
           if (index == gameQuestions.length - 1) {
             finished = true;
             notice = t('top_prize');
@@ -185,6 +187,7 @@ class _HomePageState extends State<HomePage> {
             _startCountdown();
           }
         } else {
+          if (_soundEnabled) SystemSound.play(SystemSoundType.alert);
           finished = true;
           notice = '${t('wrong')} ${optionTexts[q.answer]}';
         }
