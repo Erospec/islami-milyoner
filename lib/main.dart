@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'app_localizations.dart';
@@ -87,6 +88,10 @@ class _HomePageState extends State<HomePage> {
   final QuestionCycleService _questionService = QuestionCycleService();
   List<QuizQuestion> gameQuestions = <QuizQuestion>[];
   bool questionsLoading = true;
+  bool _started = false;
+  bool _soundEnabled = true;
+  int _secondsRemaining = 30;
+  Timer? _countdownTimer;
   int index = 0;
   int? selected;
   bool locked = false, finished = false, fiftyUsed = false, audienceUsed = false, expertUsed = false;
@@ -109,12 +114,52 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
   QuizQuestion get q => gameQuestions[index];
+
+  void _beginQuiz() {
+    if (questionsLoading) return;
+    setState(() {
+      _started = true;
+      finished = false;
+      _secondsRemaining = 30;
+    });
+    _startCountdown();
+  }
+
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted || !_started || finished || locked) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _secondsRemaining = (_secondsRemaining - 1).clamp(0, 30);
+      });
+      if (_soundEnabled && _secondsRemaining <= 10) {
+        SystemSound.play(SystemSoundType.click);
+      }
+      if (_secondsRemaining == 0) {
+        timer.cancel();
+        setState(() {
+          finished = true;
+          notice = 'Süre doldu! Cevap veremedin.';
+        });
+      }
+    });
+  }
   String t(String key) => gameText(widget.languageCode, key);
   String get guaranteed => index >= 10 ? '10.000 TL' : index >= 5 ? '5.000 TL' : '0 TL';
 
   void answer(int i) {
-    if (locked || hidden.contains(i)) return;
+    if (locked || hidden.contains(i) || !_started) return;
+    _countdownTimer?.cancel();
     setState(() { selected = i; locked = true; });
     Future.delayed(const Duration(milliseconds: 850), () {
       if (!mounted) return;
@@ -129,6 +174,8 @@ class _HomePageState extends State<HomePage> {
             selected = null;
             locked = false;
             hidden = [];
+            _secondsRemaining = 30;
+            _startCountdown();
           }
         } else {
           finished = true;
@@ -169,7 +216,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> restart() async {
+    _countdownTimer?.cancel();
     setState(() {
+      _started = false;
+      _secondsRemaining = 30;
       questionsLoading = true;
       index = 0; selected = null; locked = false; finished = false;
       fiftyUsed = false; audienceUsed = false; expertUsed = false; notice = null; hidden = [];
@@ -228,7 +278,9 @@ class _HomePageState extends State<HomePage> {
               ? const Center(child: CircularProgressIndicator(color: Color(0xFFE8C878)))
               : finished
                   ? _result()
-                  : LayoutBuilder(
+                  : !_started
+                      ? _intro()
+                      : LayoutBuilder(
                       builder: (context, constraints) {
                         final compact = constraints.maxWidth < 700;
                         if (compact) {
@@ -248,6 +300,88 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
+        ),
+      ),
+    );
+  }
+
+  Widget _intro() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(26),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 104, height: 104,
+                decoration: BoxDecoration(
+                  color: const Color(0x22E8C878),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: const Color(0x99E8C878), width: 1.5),
+                ),
+                child: const Icon(Icons.auto_awesome, color: Color(0xFFFFD978), size: 52),
+              ),
+              const SizedBox(height: 25),
+              Text(t('title'), textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xFFFFD978), fontSize: 25, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+              const SizedBox(height: 10),
+              const Text('BİLGİNİ SINAMAYA HAZIR MISIN?', textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 12, letterSpacing: 2)),
+              const SizedBox(height: 28),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10352B),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: const Color(0x66E8C878)),
+                ),
+                child: const Column(children: [
+                  Icon(Icons.timer_outlined, color: Color(0xFFFFD978), size: 34),
+                  SizedBox(height: 9),
+                  Text('15 SORU  •  30 SANİYE', style: TextStyle(color: Color(0xFFFFD978), fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  SizedBox(height: 8),
+                  Text('Her soru için 30 saniyen var. Süre dolarsa oyun sona erer. Jokerlerini doğru zamanda kullan!',
+                    textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, height: 1.45)),
+                ]),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(color: const Color(0x221FFFFFFF), borderRadius: BorderRadius.circular(18)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.volume_up_rounded, color: Color(0xFFFFD978), size: 20),
+                  const SizedBox(width: 10),
+                  const Text('Süre uyarı sesi', style: TextStyle(color: Colors.white)),
+                  const SizedBox(width: 8),
+                  Switch(value: _soundEnabled, activeColor: const Color(0xFFFFD978),
+                    onChanged: (value) => setState(() => _soundEnabled = value)),
+                ]),
+              ),
+              const SizedBox(height: 22),
+              SizedBox(
+                width: double.infinity, height: 58,
+                child: FilledButton.icon(
+                  onPressed: _beginQuiz,
+                  icon: const Icon(Icons.play_arrow_rounded, size: 28),
+                  label: const Text('OYUNA BAŞLA', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFE8C878),
+                    foregroundColor: const Color(0xFF071B18),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextButton.icon(onPressed: _selectLanguage,
+                icon: const Icon(Icons.language, color: Color(0xFFFFD978)),
+                label: Text(t('language'), style: const TextStyle(color: Color(0xFFFFD978)))),
+              Text(t('disclaimer'), textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white38, fontSize: 10)),
+            ],
+          ),
         ),
       ),
     );
@@ -305,14 +439,27 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           const SizedBox(height: 9),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: (index + 1) / 15,
-              minHeight: 5,
-              backgroundColor: const Color(0xFF25483D),
-              valueColor: const AlwaysStoppedAnimation(Color(0xFFE8C878)),
-            ),
+          Row(
+            children: [
+              const Icon(Icons.timer_outlined, color: Color(0xFFFFD978), size: 18),
+              const SizedBox(width: 6),
+              Text('00:${_secondsRemaining.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                  color: _secondsRemaining <= 10 ? const Color(0xFFFF7770) : const Color(0xFFFFD978),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                )),
+              const SizedBox(width: 10),
+              Expanded(child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: (index + 1) / 15,
+                  minHeight: 5,
+                  backgroundColor: const Color(0xFF25483D),
+                  valueColor: AlwaysStoppedAnimation(_secondsRemaining <= 10 ? const Color(0xFFE66A5E) : const Color(0xFFE8C878)),
+                ),
+              )),
+            ],
           ),
           const SizedBox(height: 16),
           Expanded(
