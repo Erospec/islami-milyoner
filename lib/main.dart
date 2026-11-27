@@ -215,104 +215,306 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: questionsLoading
-            ? const Center(child: CircularProgressIndicator())
-            : finished ? _result() : Row(children: [
-          Expanded(
-            flex: 7,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 12, 10, 18),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                Row(children: [
-                  const Icon(Icons.nights_stay, color: Color(0xFFD6AE55)),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(t('title'), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.1, color: Color(0xFFE8C878), fontSize: 13))),
-                  IconButton(onPressed: _selectLanguage, tooltip: t('language'), icon: const Icon(Icons.language, color: Color(0xFFE8C878))),
-                ]),
-                const SizedBox(height: 12),
-                Text('${t('question')} ${index + 1} / 15  •  ${q.category.toUpperCase()}',
-                  style: const TextStyle(color: Color(0xFFD6AE55), fontWeight: FontWeight.w700, letterSpacing: 1)),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(color: const Color(0xFF10332C), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFB78C3B))),
-                  child: Text(q.question, textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, height: 1.35, fontWeight: FontWeight.w600)),
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF0D3028), Color(0xFF061511), Color(0xFF04100E)],
+          ),
+        ),
+        child: SafeArea(
+          child: questionsLoading
+              ? const Center(child: CircularProgressIndicator(color: Color(0xFFE8C878)))
+              : finished
+                  ? _result()
+                  : LayoutBuilder(
+                      builder: (context, constraints) {
+                        final compact = constraints.maxWidth < 700;
+                        if (compact) {
+                          return Column(
+                            children: [
+                              Expanded(flex: 8, child: _quizPanel(compact: true)),
+                              _mobileTools(),
+                            ],
+                          );
+                        }
+                        return Row(
+                          children: [
+                            Expanded(flex: 7, child: _quizPanel(compact: false)),
+                            Container(width: 1, color: const Color(0xFF315448)),
+                            SizedBox(width: 250, child: _desktopTools()),
+                          ],
+                        );
+                      },
+                    ),
+        ),
+      ),
+    );
+  }
+
+  Widget _quizPanel({required bool compact}) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(compact ? 16 : 24, 12, compact ? 16 : 24, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: const Color(0x22E8C878),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0x55E8C878)),
                 ),
-                const SizedBox(height: 20),
-                ...List.generate(4, (i) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: InkWell(
-                    onTap: () => answer(i),
-                    borderRadius: BorderRadius.circular(14),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: hidden.contains(i) ? Colors.transparent : selected == i
-                            ? (i == q.answer ? const Color(0xFF236A45) : const Color(0xFF873D36))
-                            : const Color(0xFF123D34),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: selected == i ? const Color(0xFFE8C878) : const Color(0xFF527B6B)),
-                      ),
-                      child: Row(children: [
-                        Text(String.fromCharCode(65 + i), style: const TextStyle(color: Color(0xFFE8C878), fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(hidden.contains(i) ? ' ' : q.options[i], style: const TextStyle(fontSize: 16))),
-                      ]),
+                child: const Icon(Icons.auto_awesome, color: Color(0xFFE8C878), size: 22),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(t('title'), maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1.1, color: Color(0xFFFFD978), fontSize: 14)),
+                    const SizedBox(height: 2),
+                    const Text('BİLGİ YARIŞMASI', style: TextStyle(color: Colors.white54, fontSize: 9, letterSpacing: 2)),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: _selectLanguage,
+                tooltip: t('language'),
+                style: IconButton.styleFrom(backgroundColor: const Color(0x221FFFFFFF)),
+                icon: const Icon(Icons.language, color: Color(0xFFE8C878)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: Text('${t('question')} ${index + 1} / 15',
+                  style: const TextStyle(color: Color(0xFFFFD978), fontWeight: FontWeight.w800, letterSpacing: 1)),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                decoration: BoxDecoration(color: const Color(0x22E8C878), borderRadius: BorderRadius.circular(20)),
+                child: Text(q.category.toUpperCase(), style: const TextStyle(color: Color(0xFFFFD978), fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: (index + 1) / 15,
+              minHeight: 5,
+              backgroundColor: const Color(0xFF25483D),
+              valueColor: const AlwaysStoppedAnimation(Color(0xFFE8C878)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: compact ? 25 : 34),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [Color(0xFF174638), Color(0xFF0D2C24)]),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: const Color(0x99D6AE55), width: 1.2),
+                      boxShadow: const [BoxShadow(color: Color(0x44000000), blurRadius: 22, offset: Offset(0, 9))],
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.stars_rounded, color: Color(0xFFE8C878), size: 25),
+                        const SizedBox(height: 12),
+                        Text(q.question, textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: compact ? 20 : 25, height: 1.4, fontWeight: FontWeight.w700, color: const Color(0xFFFFF5D9))),
+                      ],
                     ),
                   ),
-                )),
-                const Spacer(),
-                if (notice != null)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: const Color(0xFF183D32), borderRadius: BorderRadius.circular(12)),
-                    child: Text(notice!, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFE8C878))),
+                  const SizedBox(height: 17),
+                  ...List.generate(4, (i) {
+                    final isSelected = selected == i;
+                    final isHidden = hidden.contains(i);
+                    final isCorrect = isSelected && i == q.answer;
+                    final isWrong = isSelected && i != q.answer;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: locked || isHidden ? null : () => answer(i),
+                          borderRadius: BorderRadius.circular(16),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+                            decoration: BoxDecoration(
+                              gradient: isCorrect
+                                  ? const LinearGradient(colors: [Color(0xFF287A50), Color(0xFF174D37)])
+                                  : isWrong
+                                      ? const LinearGradient(colors: [Color(0xFF8C3935), Color(0xFF542421)])
+                                      : const LinearGradient(colors: [Color(0xFF153C31), Color(0xFF102D25)]),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: isSelected ? const Color(0xFFFFD978) : const Color(0x665F927C), width: isSelected ? 1.8 : 1),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 34, height: 34,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0x22E8C878),
+                                    borderRadius: BorderRadius.circular(11),
+                                    border: Border.all(color: const Color(0x66E8C878)),
+                                  ),
+                                  child: Text(String.fromCharCode(65 + i), style: const TextStyle(color: Color(0xFFFFD978), fontWeight: FontWeight.w900)),
+                                ),
+                                const SizedBox(width: 13),
+                                Expanded(child: Text(isHidden ? '' : q.options[i],
+                                  style: const TextStyle(fontSize: 15, height: 1.3, color: Color(0xFFF4F1E7), fontWeight: FontWeight.w500))),
+                                if (isCorrect) const Icon(Icons.check_circle, color: Color(0xFFFFD978))
+                                else if (isWrong) const Icon(Icons.cancel, color: Colors.white),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                  if (notice != null)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(top: 4),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: const Color(0xFF183D32), borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0x55E8C878))),
+                      child: Text(notice!, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFFFD978), fontSize: 13)),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 6),
+                    child: Text(t('disclaimer'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white38, fontSize: 10)),
                   ),
-                const SizedBox(height: 8),
-                Text(t('disclaimer'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 11)),
-              ]),
+                ],
+              ),
             ),
           ),
-          Container(width: 1, color: const Color(0xFF315448)),
-          Expanded(
-            flex: 3,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 18, 10, 18),
-              child: Column(children: [
-                Text(t('lifelines'), style: const TextStyle(color: Color(0xFFD6AE55), fontWeight: FontWeight.bold, fontSize: 12)),
-                const SizedBox(height: 12),
-                _joker(t('fifty'), fiftyUsed, useFifty),
-                _joker(t('audience'), audienceUsed, useAudience),
-                _joker(t('expert'), expertUsed, useExpert),
-                const Divider(height: 24, color: Color(0xFF527B6B)),
-                Text(t('ladder'), style: const TextStyle(color: Color(0xFFD6AE55), fontSize: 10, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: ListView.builder(
-                    reverse: true,
-                    itemCount: prizeLadder.length,
-                    itemBuilder: (context, i) {
-                      final actual = 14 - i;
-                      final active = actual == index;
-                      final safe = actual == 4 || actual == 9;
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 4),
-                        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
-                        decoration: BoxDecoration(color: active ? const Color(0xFFB78C3B) : Colors.transparent, borderRadius: BorderRadius.circular(7)),
-                        child: Text('${actual + 1}.  ${prizeLadder[actual]}', textAlign: TextAlign.right,
-                          style: TextStyle(fontSize: 11, fontWeight: active ? FontWeight.bold : FontWeight.normal,
-                            color: active ? const Color(0xFF071B18) : safe ? const Color(0xFFE8C878) : Colors.white70)),
-                      );
-                    },
-                  ),
-                ),
-              ]),
-            ),
-          ),
-        ]),
+        ],
       ),
+    );
+  }
+
+  Widget _desktopTools() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 20, 14, 18),
+      child: Column(
+        children: [
+          Text(t('lifelines'), style: const TextStyle(color: Color(0xFFFFD978), fontWeight: FontWeight.bold, fontSize: 13)),
+          const SizedBox(height: 12),
+          _joker(t('fifty'), fiftyUsed, useFifty),
+          _joker(t('audience'), audienceUsed, useAudience),
+          _joker(t('expert'), expertUsed, useExpert),
+          const Divider(height: 26, color: Color(0xFF527B6B)),
+          Text(t('ladder'), style: const TextStyle(color: Color(0xFFFFD978), fontSize: 11, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Expanded(child: _prizeLadder()),
+        ],
+      ),
+    );
+  }
+
+  Widget _mobileTools() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0B211B),
+        border: Border(top: BorderSide(color: Color(0x665F927C))),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _mobileJoker(Icons.filter_2, t('fifty'), fiftyUsed, useFifty)),
+              const SizedBox(width: 8),
+              Expanded(child: _mobileJoker(Icons.groups_rounded, t('audience'), audienceUsed, useAudience)),
+              const SizedBox(width: 8),
+              Expanded(child: _mobileJoker(Icons.lightbulb_outline, t('expert'), expertUsed, useExpert)),
+            ],
+          ),
+          const SizedBox(height: 7),
+          SizedBox(height: 34, child: _prizeLadder(horizontal: true)),
+        ],
+      ),
+    );
+  }
+
+  Widget _mobileJoker(IconData icon, String label, bool used, VoidCallback action) {
+    return OutlinedButton(
+      onPressed: used || locked ? null : action,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFFFFD978),
+        side: const BorderSide(color: Color(0x88D6AE55)),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        minimumSize: const Size(0, 42),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 17),
+        const SizedBox(height: 2),
+        Text(used ? '✓' : label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 9)),
+      ]),
+    );
+  }
+
+  Widget _prizeLadder({bool horizontal = false}) {
+    if (horizontal) {
+      return ListView.builder(
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+        itemCount: prizeLadder.length,
+        itemBuilder: (context, i) {
+          final actual = 14 - i;
+          final active = actual == index;
+          final safe = actual == 4 || actual == 9;
+          return Container(
+            alignment: Alignment.center,
+            margin: const EdgeInsets.only(left: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: active ? const Color(0xFFE8C878) : const Color(0xFF17382E),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: active ? const Color(0xFFFFE8A6) : const Color(0x335F927C)),
+            ),
+            child: Text(prizeLadder[actual], style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold,
+              color: active ? const Color(0xFF071B18) : safe ? const Color(0xFFFFD978) : Colors.white70)),
+          );
+        },
+      );
+    }
+    return ListView.builder(
+      reverse: true,
+      itemCount: prizeLadder.length,
+      itemBuilder: (context, i) {
+        final actual = 14 - i;
+        final active = actual == index;
+        final safe = actual == 4 || actual == 9;
+        return Container(
+          margin: const EdgeInsets.only(bottom: 5),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 9),
+          decoration: BoxDecoration(
+            color: active ? const Color(0xFFE8C878) : const Color(0x2217382E),
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: active ? const Color(0xFFFFE8A6) : const Color(0x225F927C)),
+          ),
+          child: Text('${actual + 1}.  ${prizeLadder[actual]}', textAlign: TextAlign.right,
+            style: TextStyle(fontSize: 11, fontWeight: active ? FontWeight.bold : FontWeight.normal,
+              color: active ? const Color(0xFF071B18) : safe ? const Color(0xFFFFD978) : Colors.white70)),
+        );
+      },
     );
   }
 
