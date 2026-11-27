@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'app_localizations.dart';
 import 'language_service.dart';
 import 'questions.dart';
@@ -140,7 +141,7 @@ class _HomePageState extends State<HomePage> {
         return;
       }
       setState(() {
-        _secondsRemaining = (_secondsRemaining - 1).clamp(0, 30);
+        if (_secondsRemaining > 0) _secondsRemaining--;
       });
       if (_soundEnabled && _secondsRemaining <= 10) {
         SystemSound.play(SystemSoundType.click);
