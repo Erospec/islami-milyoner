@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'app_localizations.dart';
 import 'language_service.dart';
@@ -88,6 +89,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final QuestionCycleService _questionService = QuestionCycleService();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  Future<void> _playSound(String file) async {
+    if (!_soundEnabled) return;
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.play(AssetSource('sounds/$file.wav'));
+    } catch (_) {
+      // Keep the quiz playable if the device cannot initialize audio.
+    }
+  }
   List<QuizQuestion> gameQuestions = <QuizQuestion>[];
   bool questionsLoading = true;
   bool _started = false;
@@ -119,6 +131,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -131,7 +144,7 @@ class _HomePageState extends State<HomePage> {
       finished = false;
       _secondsRemaining = 30;
     });
-    if (_soundEnabled) SystemSound.play(SystemSoundType.alert);
+    _playSound('start');
     _startCountdown();
   }
 
@@ -146,7 +159,7 @@ class _HomePageState extends State<HomePage> {
         if (_secondsRemaining > 0) _secondsRemaining--;
       });
       if (_soundEnabled && _secondsRemaining <= 10) {
-        SystemSound.play(SystemSoundType.alert);
+        _playSound('countdown');
       }
       if (_secondsRemaining == 0) {
         timer.cancel();
@@ -173,7 +186,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       setState(() {
         if (i == q.answer) {
-          if (_soundEnabled) SystemSound.play(SystemSoundType.alert);
+          _playSound('correct');
           if (index == gameQuestions.length - 1) {
             finished = true;
             notice = t('top_prize');
@@ -187,7 +200,7 @@ class _HomePageState extends State<HomePage> {
             _startCountdown();
           }
         } else {
-          if (_soundEnabled) SystemSound.play(SystemSoundType.alert);
+          _playSound('wrong');
           finished = true;
           notice = '${t('wrong')} ${optionTexts[q.answer]}';
         }
@@ -198,11 +211,13 @@ class _HomePageState extends State<HomePage> {
   void useFifty() {
     if (fiftyUsed || locked) return;
     final wrong = List<int>.generate(4, (i) => i)..remove(q.answer)..shuffle();
+    _playSound('joker');
     setState(() { fiftyUsed = true; hidden = wrong.take(2).toList(); notice = t('fifty_used'); });
   }
 
   void useAudience() {
     if (audienceUsed || locked) return;
+    _playSound('joker');
     final correct = 45 + random.nextInt(36);
     final remaining = 100 - correct;
     final vals = [0, 0, 0, 0];
@@ -222,6 +237,7 @@ class _HomePageState extends State<HomePage> {
 
   void useExpert() {
     if (expertUsed || locked) return;
+    _playSound('joker');
     setState(() { expertUsed = true; notice = '${t('hint')}: ${explanationText}'; });
   }
 
