@@ -2,36 +2,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'app_localizations.dart';
 import 'language_service.dart';
+import 'questions.dart';
+import 'question_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const IslamicMillionaireApp());
 }
-
-class QuizQuestion {
-  final String category, question, explanation;
-  final List<String> options;
-  final int answer;
-  const QuizQuestion(this.category, this.question, this.options, this.answer, this.explanation);
-}
-
-const questions = <QuizQuestion>[
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’de kaç sure vardır?', ['110', '112', '114', '116'], 2, 'Kur’an-ı Kerim 114 sureden oluşur.'),
-  QuizQuestion('Siyer', 'Hz. Muhammed’e (s.a.v.) ilk vahiy hangi mağarada gelmiştir?', ['Sevr', 'Hira', 'Nur', 'Arafat'], 1, 'İlk vahiy, Mekke yakınlarındaki Hira Mağarası’nda gelmiştir.'),
-  QuizQuestion('İbadet', 'İslam’ın şartı kaçtır?', ['Üç', 'Dört', 'Beş', 'Altı'], 2, 'Yaygın olarak öğretilen tasnife göre İslam’ın beş şartı vardır.'),
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’in ilk suresi hangisidir?', ['Bakara', 'Fatiha', 'İhlas', 'Alak'], 1, 'Mushaf sıralamasındaki ilk sure Fatiha Suresi’dir.'),
-  QuizQuestion('Siyer', 'Hz. Muhammed (s.a.v.) hangi şehirde dünyaya gelmiştir?', ['Medine', 'Taif', 'Kudüs', 'Mekke'], 3, 'Hz. Muhammed (s.a.v.) Mekke’de dünyaya gelmiştir.'),
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim hangi dilde indirilmiştir?', ['İbranice', 'Arapça', 'Süryanice', 'Farsça'], 1, 'Kur’an’ın kendi ifadesiyle Arapça bir Kur’an olarak indirilmiştir.'),
-  QuizQuestion('Hadis', '“Ameller niyetlere göredir” hadisi en çok hangi konuyu vurgular?', ['Niyetin önemini', 'Ticaretin önemini', 'Yolculuğu', 'Komşuluk hukukunu'], 0, 'Bu hadis, yapılan işlerde niyetin belirleyici önemini vurgular.'),
-  QuizQuestion('İslam Tarihi', 'Hicret, Müslümanların hangi şehirden hangi şehre göçüdür?', ['Mekke’den Medine’ye', 'Medine’den Şam’a', 'Taif’ten Mekke’ye', 'Kudüs’ten Medine’ye'], 0, 'Hicret, 622 yılında Mekke’den Medine’ye gerçekleşmiştir.'),
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’in en uzun suresi hangisidir?', ['Âl-i İmrân', 'Nisâ', 'Bakara', 'Mâide'], 2, 'En uzun sure, 286 ayetli Bakara Suresi’dir.'),
-  QuizQuestion('Siyer', 'İlk Müslüman kadın olarak kabul edilen kişi kimdir?', ['Hz. Âişe', 'Hz. Hatice', 'Hz. Fatıma', 'Hz. Hafsa'], 1, 'Hz. Hatice, İslam’ı ilk kabul eden kişidir.'),
-  QuizQuestion('İslam Tarihi', 'Bedir Savaşı hicretin kaçıncı yılında gerçekleşmiştir?', ['1. yıl', '2. yıl', '3. yıl', '5. yıl'], 1, 'Bedir Savaşı, hicretin ikinci yılında (624) gerçekleşmiştir.'),
-  QuizQuestion('Hadis', 'Kütüb-i Sitte ifadesi geleneksel olarak kaç hadis kitabını ifade eder?', ['Dört', 'Beş', 'Altı', 'Yedi'], 2, 'Kütüb-i Sitte, Sünni hadis geleneğinde altı temel hadis kitabı için kullanılan addır.'),
-  QuizQuestion('Kur’an', 'Kur’an-ı Kerim’de adı geçen ve aynı zamanda bir sureye adını veren peygamber kimdir?', ['Hz. Yunus', 'Hz. Yusuf', 'Hz. İdris', 'Hz. Şuayb'], 1, 'Yusuf Suresi, Hz. Yusuf’un kıssasını anlatır.'),
-  QuizQuestion('İslam Tarihi', 'Mekke’nin fethi hangi hicrî yılda gerçekleşmiştir?', ['6', '7', '8', '10'], 2, 'Mekke’nin fethi hicretin 8. yılında, miladi 630’da gerçekleşmiştir.'),
-  QuizQuestion('Kur’an ve Siyer', 'Veda Hutbesi, Hz. Muhammed (s.a.v.) tarafından hangi hac sırasında irat edilmiştir?', ['Umre', 'Veda Haccı', 'İlk hac', 'Kaza umresi'], 1, 'Veda Hutbesi, hicretin 10. yılında yapılan Veda Haccı sırasında irat edilmiştir.'),
-];
 
 const prizeLadder = [
   '1.000 TL', '2.000 TL', '3.000 TL', '5.000 TL', '7.500 TL',
@@ -107,6 +84,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final QuestionCycleService _questionService = QuestionCycleService();
+  List<QuizQuestion> gameQuestions = <QuizQuestion>[];
+  bool questionsLoading = true;
   int index = 0;
   int? selected;
   bool locked = false, finished = false, fiftyUsed = false, audienceUsed = false, expertUsed = false;
@@ -114,7 +94,22 @@ class _HomePageState extends State<HomePage> {
   List<int> hidden = [];
   final random = Random();
 
-  QuizQuestion get q => questions[index];
+  @override
+  void initState() {
+    super.initState();
+    _loadNextGame();
+  }
+
+  Future<void> _loadNextGame() async {
+    final selectedQuestions = await _questionService.nextGame();
+    if (!mounted) return;
+    setState(() {
+      gameQuestions = selectedQuestions;
+      questionsLoading = false;
+    });
+  }
+
+  QuizQuestion get q => gameQuestions[index];
   String t(String key) => gameText(widget.languageCode, key);
   String get guaranteed => index >= 10 ? '10.000 TL' : index >= 5 ? '5.000 TL' : '0 TL';
 
@@ -125,7 +120,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       setState(() {
         if (i == q.answer) {
-          if (index == questions.length - 1) {
+          if (index == gameQuestions.length - 1) {
             finished = true;
             notice = 'Congratulations! You reached the top prize.';
           } else {
@@ -173,10 +168,14 @@ class _HomePageState extends State<HomePage> {
     setState(() { expertUsed = true; notice = 'Hint: ${q.explanation}'; });
   }
 
-  void restart() => setState(() {
-    index = 0; selected = null; locked = false; finished = false;
-    fiftyUsed = false; audienceUsed = false; expertUsed = false; notice = null; hidden = [];
-  });
+  Future<void> restart() async {
+    setState(() {
+      questionsLoading = true;
+      index = 0; selected = null; locked = false; finished = false;
+      fiftyUsed = false; audienceUsed = false; expertUsed = false; notice = null; hidden = [];
+    });
+    await _loadNextGame();
+  }
 
   Future<void> _selectLanguage() async {
     final selectedCode = await showModalBottomSheet<String>(
@@ -217,7 +216,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: finished ? _result() : Row(children: [
+        child: questionsLoading
+            ? const Center(child: CircularProgressIndicator())
+            : finished ? _result() : Row(children: [
           Expanded(
             flex: 7,
             child: Padding(
